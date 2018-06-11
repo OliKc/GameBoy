@@ -34,19 +34,26 @@ long previousMillis = 0;
 int interval = 1000;
 
 
-
-
 byte score = 0;
 
 byte buttonState = 0;
 
 boolean paused = false;
+boolean egg = false;
 
 //direction flags w/ initial flag
-boolean upward = false, rightward = true, downward = false, leftward = false;
+boolean
+upward = false,
+rightward = true,
+downward = false,
+leftward = false;
 
 //snake body properties
-byte x[150], y[150], d[150], snakeSize = INITIAL_SNAKE_SIZE;
+byte
+x[SEGMENTCOUNT],
+y[SEGMENTCOUNT],
+d[SEGMENTCOUNT],
+snakeSize = INITIAL_SNAKE_SIZE;
 
 int Buzzer;
 
@@ -54,7 +61,8 @@ int Buzzer;
 #define LOGO16_GLCD_WIDTH  16
 
 
-void setup()   {
+void setup()
+{
   pinMode(UP, INPUT);
   pinMode(RIGHT, INPUT);
   pinMode(DOWN, INPUT);
@@ -129,7 +137,12 @@ void loop()
       if (!collision())
       {
         drawSnake();
-        addEgg();
+
+        if (!egg) {
+          Serial.println("jajko");
+          addEgg();
+        }
+
       }
       else
       {
@@ -170,7 +183,7 @@ void steering()
 
 void moveSnake()
 {
-  byte newx, newy, newd;
+  byte tempx, tempy, tempd;
 
   //if wrong key pressed - impossible move
   if (d[0] == UP_DIRECTION && downward == true) {
@@ -200,13 +213,13 @@ void moveSnake()
   {
     //Serial.print("upward\n");
     if (y[0] - SEGMENTSIZE < 1) {
-      newy = AREAHEIGHT - SEGMENTSIZE - 1;
+      tempy = AREAHEIGHT - SEGMENTSIZE - 1;
     }
     else {
-      newy = y[0] - SEGMENTSIZE;
+      tempy = y[0] - SEGMENTSIZE;
     }
-    newx = x[0];
-    newd = UP_DIRECTION;
+    tempx = x[0];
+    tempd = UP_DIRECTION;
   }
 
   //move right
@@ -214,13 +227,13 @@ void moveSnake()
   {
     //Serial.print("rightward\n");
     if (x[0] + SEGMENTSIZE > AREAWIDTH - SEGMENTSIZE - 2) {
-      newx = 2;
+      tempx = 2;
     }
     else {
-      newx = x[0] + SEGMENTSIZE;
+      tempx = x[0] + SEGMENTSIZE;
     }
-    newy = y[0];
-    newd = RIGHT_DIRECTION;
+    tempy = y[0];
+    tempd = RIGHT_DIRECTION;
   }
 
   //move down
@@ -228,13 +241,13 @@ void moveSnake()
   {
     //Serial.print("downward\n");
     if (y[0] + SEGMENTSIZE > AREAHEIGHT - SEGMENTSIZE - 1) {
-      newy = 1;
+      tempy = 1;
     }
     else {
-      newy = y[0] + SEGMENTSIZE;
+      tempy = y[0] + SEGMENTSIZE;
     }
-    newx = x[0];
-    newd = DOWN_DIRECTION;
+    tempx = x[0];
+    tempd = DOWN_DIRECTION;
   }
 
   //move left
@@ -242,13 +255,13 @@ void moveSnake()
   {
     //Serial.print("leftward\n");
     if (x[0] - SEGMENTSIZE < 2) {
-      newx = AREAWIDTH - SEGMENTSIZE - 2;
+      tempx = AREAWIDTH - SEGMENTSIZE - 2;
     }
     else {
-      newx = x[0] - SEGMENTSIZE;
+      tempx = x[0] - SEGMENTSIZE;
     }
-    newy = y[0];
-    newd = LEFT_DIRECTION;
+    tempy = y[0];
+    tempd = LEFT_DIRECTION;
   }
 
 
@@ -259,12 +272,12 @@ void moveSnake()
     byte _x = x[i];
     byte _y = y[i];
     byte _d = d[i];
-    x[i] = newx;
-    y[i] = newy;
-    d[i] = newd;
-    newx = _x;
-    newy = _y;
-    newd = _d;
+    x[i] = tempx;
+    y[i] = tempy;
+    d[i] = tempd;
+    tempx = _x;
+    tempy = _y;
+    tempd = _d;
   }
 
   //Serial.print('\n');
@@ -432,10 +445,14 @@ void drawSnake()
 
 void addEgg()
 {
-//  for (;;)
-//  {
-//    
-//  }
+  byte i, j;
+  for (i = 0; i < SEGMENTCOUNT; i++)
+  {
+    for (j = 0; j < SEGMENTCOUNT; j++)
+    {
+
+    }
+  }
 }
 
 
