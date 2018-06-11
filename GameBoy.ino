@@ -11,37 +11,31 @@
 // pin 3 - LCD reset (RST)
 Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 
-// Hardware SPI (faster, but must use certain hardware pins):
-// SCK is LCD serial clock (SCLK) - this is pin 13 on Arduino Uno
-// MOSI is LCD DIN - this is pin 11 on an Arduino Uno
-// pin 5 - Data/Command select (D/C)
-// pin 4 - LCD chip select (CS)
-// pin 3 - LCD reset (RST)
-// Adafruit_PCD8544 display = Adafruit_PCD8544(5, 4, 3);
-// Note with hardware SPI MISO and SS pins aren't used but will still be read
-// and written to during SPI transfer.  Be careful sharing these pins!
-
-
 #define AREAWIDTH 84
-#define AREAHEIGHT 47
+#define AREAHEIGHT 47     //1px trimmed
+
 #define SEGMENTSIZE 5
-
-
-const byte UP_DIRECTION = 0;
-const byte RIGHT_DIRECTION = 1;
-const byte DOWN_DIRECTION = 2;
-const byte LEFT_DIRECTION = 3;
-
-long previousMillis = 0;
-long interval = 2000;
-
+#define SEGMENTCOUNT 144  //16*9
 
 //D pad pins
-const byte UP = 8;
-const byte RIGHT = 9;
-const byte DOWN = 10;
-const byte LEFT = 11;
+#define UP = 8;
+#define RIGHT = 9;
+#define DOWN = 10;
+#define LEFT = 11;
 
+#define UP_DIRECTION = 0;
+#define RIGHT_DIRECTION = 1;
+#define DOWN_DIRECTION = 2;
+#define LEFT_DIRECTION = 3;
+
+long previousMillis = 0;
+int interval = 500;
+
+
+const byte initialSnakeSize = 6;
+
+
+byte score = 0;
 
 byte buttonState = 0;
 
@@ -50,8 +44,7 @@ byte buttonState = 0;
 boolean upward = false, rightward = true, downward = false, leftward = false;
 
 //snake body properties
-int x[150], y[150];
-byte d[150], snakeLength = 6;
+byte x[150], y[150], d[150], snakeSize = initialSnakeSize;
 
 int Buzzer;
 
@@ -62,6 +55,8 @@ int Buzzer;
 void setup()   {
   pinMode(UP, INPUT);
   pinMode(RIGHT, INPUT);
+  pinMode(DOWN, INPUT);
+  pinMode(LEFT, INPUT);
 
 
   pinMode(13, OUTPUT); //LED
@@ -86,7 +81,7 @@ void setup()   {
 
   int i;
   //initial snake position
-  for (i = 0; i <= snakeLength; i++)
+  for (i = 0; i <= snakeSize; i++)
   {
     x[i] = 32 - i * 5;  //2+5n
     y[i] = 21;          //1+5n
@@ -97,7 +92,7 @@ void setup()   {
   d[0] = RIGHT_DIRECTION;
 
   //draw start body
-  for (i = 1; i < snakeLength - 1; i++)
+  for (i = 1; i < snakeSize - 1; i++)
   {
     display.drawPixel(x[i], y[i] + 2, BLACK);
     display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
@@ -105,9 +100,9 @@ void setup()   {
   }
 
   //draw start tail
-  display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 2, 2, 1, BLACK);
-  display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 1, 3, 3, BLACK);
-  d[snakeLength - 1] = RIGHT_DIRECTION;
+  display.fillRect(x[snakeSize - 1], y[snakeSize - 1] + 2, 2, 1, BLACK);
+  display.fillRect(x[snakeSize - 1] + 2, y[snakeSize - 1] + 1, 3, 3, BLACK);
+  d[snakeSize - 1] = RIGHT_DIRECTION;
 
   display.display();
 }
@@ -125,7 +120,10 @@ void loop() {
 
     //Serial.print("flag\n");
     moveSnake();
-    drawSnake();
+    if(!checkCollision())
+    {
+          drawSnake();
+    }
   }
 
 }
@@ -161,7 +159,7 @@ void steering()
 
 void moveSnake()
 {
-  byte tempx, tempy, tempd;
+  byte newx, newy, newd;
 
   //if wrong key pressed - impossible move
   if (d[0] == UP_DIRECTION && downward == true) {
@@ -185,24 +183,19 @@ void moveSnake()
     //    Serial.println('d');
   }
 
-  //  Serial.println(d[0]);
-  Serial.println(upward);
-  Serial.println(rightward);
-  Serial.println(downward);
-  Serial.println(leftward);
 
   //move up
   if (upward == true)
   {
     //Serial.print("upward\n");
     if (y[0] - SEGMENTSIZE < 1) {
-      tempy = AREAHEIGHT - SEGMENTSIZE - 1;
+      newy = AREAHEIGHT - SEGMENTSIZE - 1;
     }
     else {
-      tempy = y[0] - SEGMENTSIZE;
+      newy = y[0] - SEGMENTSIZE;
     }
-    tempx = x[0];
-    tempd = UP_DIRECTION;
+    newx = x[0];
+    newd = UP_DIRECTION;
   }
 
   //move right
@@ -210,13 +203,13 @@ void moveSnake()
   {
     //Serial.print("rightward\n");
     if (x[0] + SEGMENTSIZE > AREAWIDTH - SEGMENTSIZE - 2) {
-      tempx = 2;
+      newx = 2;
     }
     else {
-      tempx = x[0] + SEGMENTSIZE;
+      newx = x[0] + SEGMENTSIZE;
     }
-    tempy = y[0];
-    tempd = RIGHT_DIRECTION;
+    newy = y[0];
+    newd = RIGHT_DIRECTION;
   }
 
   //move down
@@ -224,13 +217,13 @@ void moveSnake()
   {
     //Serial.print("downward\n");
     if (y[0] + SEGMENTSIZE > AREAHEIGHT - SEGMENTSIZE - 1) {
-      tempy = 1;
+      newy = 1;
     }
     else {
-      tempy = y[0] + SEGMENTSIZE;
+      newy = y[0] + SEGMENTSIZE;
     }
-    tempx = x[0];
-    tempd = DOWN_DIRECTION;
+    newx = x[0];
+    newd = DOWN_DIRECTION;
   }
 
   //move left
@@ -238,39 +231,78 @@ void moveSnake()
   {
     //Serial.print("leftward\n");
     if (x[0] - SEGMENTSIZE < 2) {
-      tempx = AREAWIDTH - SEGMENTSIZE - 2;
+      newx = AREAWIDTH - SEGMENTSIZE - 2;
     }
     else {
-      tempx = x[0] - SEGMENTSIZE;
+      newx = x[0] - SEGMENTSIZE;
     }
-    tempy = y[0];
-    tempd = LEFT_DIRECTION;
+    newy = y[0];
+    newd = LEFT_DIRECTION;
   }
 
 
   //snake position shift
-  int i;
-  for (i = 0; i <= snakeLength; i++)
+  byte i;
+  for (i = 0; i <= snakeSize; i++)
   {
-    byte xx = x[i];
-    byte yy = y[i];
-    byte dd = d[i];
-    x[i] = tempx;
-    y[i] = tempy;
-    d[i] = tempd;
-    tempx = xx;
-    tempy = yy;
-    tempd = dd;
+    byte _x = x[i];
+    byte _y = y[i];
+    byte _d = d[i];
+    x[i] = newx;
+    y[i] = newy;
+    d[i] = newd;
+    newx = _x;
+    newy = _y;
+    newd = _d;
   }
 
-  Serial.print('\n');
+  //Serial.print('\n');
 
+}
+
+boolean checkCollision()
+{
+  //check head collision
+  byte i;
+  for (i = 1; i < snakeSize; i++)
+  {
+    if (x[i] == x[0] && y[i] == y[0])
+    {
+      //game over
+      score = snakeSize - initialSnakeSize;
+      
+      display.fillRect(14, 14, 55, 18, WHITE);
+      
+      display.setTextColor(BLACK);   
+      display.setTextSize(1);
+      
+      display.setCursor(15, 15);
+      display.print("Game Over");
+
+      display.setCursor(15, 24);
+      if (score < 10) {
+        display.print("score:  ");
+      }
+      else if (score < 100) {
+        display.print("score: ");
+      }
+      else {
+        display.print("score:");
+      }
+      display.print(score);
+      
+      display.display();
+      interval = 20000;
+      return true;
+    }
+  }
+  return false;
 }
 
 void drawSnake()
 {
   //delete tail
-  display.fillRect(x[snakeLength], y[snakeLength], 5, 5, WHITE);
+  display.fillRect(x[snakeSize], y[snakeSize], 5, 5, WHITE);
 
 
   //draw head
@@ -301,10 +333,9 @@ void drawSnake()
     Serial.print("head error\n");
   }
 
-
   //draw body
   byte i;
-  for (i = 1; i < snakeLength - 1; i++)
+  for (i = 1; i < snakeSize - 1; i++)
   {
     display.fillRect(x[i], y[i], 5, 5, WHITE);
 
@@ -348,30 +379,30 @@ void drawSnake()
   }
 
   //draw tail
-  display.fillRect(x[snakeLength - 1], y[snakeLength - 1], 5, 5, WHITE);
-  if (d[snakeLength - 1] == UP_DIRECTION)
+  display.fillRect(x[snakeSize - 1], y[snakeSize - 1], 5, 5, WHITE);
+  if (d[snakeSize - 1] == UP_DIRECTION)
   {
     //    Serial.print("tail UP\n");
-    display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1], 3, 3, BLACK);
-    display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 3, 1, 2, BLACK);
+    display.fillRect(x[snakeSize - 1] + 1, y[snakeSize - 1], 3, 3, BLACK);
+    display.fillRect(x[snakeSize - 1] + 2, y[snakeSize - 1] + 3, 1, 2, BLACK);
   }
-  else if (d[snakeLength - 1] == RIGHT_DIRECTION)
+  else if (d[snakeSize - 1] == RIGHT_DIRECTION)
   {
     //    Serial.print("tail RIGHT\n");
-    display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 2, 2, 1, BLACK);
-    display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 1, 3, 3, BLACK);
+    display.fillRect(x[snakeSize - 1], y[snakeSize - 1] + 2, 2, 1, BLACK);
+    display.fillRect(x[snakeSize - 1] + 2, y[snakeSize - 1] + 1, 3, 3, BLACK);
   }
-  else if (d[snakeLength - 1] == DOWN_DIRECTION)
+  else if (d[snakeSize - 1] == DOWN_DIRECTION)
   {
     //    Serial.print("tail DOWN\n");
-    display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1], 1, 2, BLACK);
-    display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1] + 2, 3, 3, BLACK);
+    display.fillRect(x[snakeSize - 1] + 2, y[snakeSize - 1], 1, 2, BLACK);
+    display.fillRect(x[snakeSize - 1] + 1, y[snakeSize - 1] + 2, 3, 3, BLACK);
   }
-  else if (d[snakeLength - 1] == LEFT_DIRECTION)
+  else if (d[snakeSize - 1] == LEFT_DIRECTION)
   {
     //    Serial.print("tail LEFT\n");
-    display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 1, 3, 3, BLACK);
-    display.fillRect(x[snakeLength - 1] + 3, y[snakeLength - 1] + 2, 2, 1, BLACK);
+    display.fillRect(x[snakeSize - 1], y[snakeSize - 1] + 1, 3, 3, BLACK);
+    display.fillRect(x[snakeSize - 1] + 3, y[snakeSize - 1] + 2, 2, 1, BLACK);
   }
   else
   {
