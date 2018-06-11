@@ -81,12 +81,13 @@ void setup()   {
   display.drawLine(1, 0, 1, AREAHEIGHT - 1, BLACK);
   display.drawLine(AREAWIDTH - 2, 0, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
 
-  int i;
+
   //initial snake position
-  for (i = 0; i <= snakeSize; i++)
+  int i;
+  for (i = 0; i < snakeSize; i++)
   {
-    x[i] = 32 - i * 5;  //2+5n
-    y[i] = 21;          //1+5n
+    x[i] = (6 * SEGMENTSIZE + 2) - i * 5; //2+5n - 5i
+    y[i] = (4 * SEGMENTSIZE + 1);         //1+5n
   }
 
   //draw start head
@@ -105,6 +106,7 @@ void setup()   {
   display.fillRect(x[snakeSize - 1], y[snakeSize - 1] + 2, 2, 1, BLACK);
   display.fillRect(x[snakeSize - 1] + 2, y[snakeSize - 1] + 1, 3, 3, BLACK);
   d[snakeSize - 1] = RIGHT_DIRECTION;
+
 
   display.display();
 }
@@ -127,6 +129,7 @@ void loop()
       if (!collision())
       {
         drawSnake();
+        addEgg();
       }
       else
       {
@@ -309,8 +312,12 @@ boolean collision()
 
 void drawSnake()
 {
-  //delete tail
+  //clear excess tail
   display.fillRect(x[snakeSize], y[snakeSize], 5, 5, WHITE);
+
+  //reset excess tail properties
+  x[snakeSize] = 0; //or :=NULL
+  y[snakeSize] = 0; //or :=NULL
 
 
   //draw head
@@ -340,6 +347,7 @@ void drawSnake()
     //error
     Serial.print("head error\n");
   }
+
 
   //draw body
   byte i;
@@ -386,6 +394,7 @@ void drawSnake()
     }
   }
 
+
   //draw tail
   display.fillRect(x[snakeSize - 1], y[snakeSize - 1], 5, 5, WHITE);
   if (d[snakeSize - 1] == UP_DIRECTION)
@@ -418,8 +427,15 @@ void drawSnake()
     Serial.print("tail error\n");
   }
 
-
   display.display();
+}
+
+void addEgg()
+{
+//  for (;;)
+//  {
+//    
+//  }
 }
 
 
