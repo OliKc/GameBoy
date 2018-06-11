@@ -18,33 +18,35 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define SEGMENTCOUNT 144  //16*9
 
 //D pad pins
-#define UP = 8;
-#define RIGHT = 9;
-#define DOWN = 10;
-#define LEFT = 11;
+#define UP 8
+#define RIGHT 9
+#define DOWN 10
+#define LEFT 11
 
-#define UP_DIRECTION = 0;
-#define RIGHT_DIRECTION = 1;
-#define DOWN_DIRECTION = 2;
-#define LEFT_DIRECTION = 3;
+#define UP_DIRECTION 0
+#define RIGHT_DIRECTION 1
+#define DOWN_DIRECTION 2
+#define LEFT_DIRECTION 3
+
+#define INITIAL_SNAKE_SIZE 6
 
 long previousMillis = 0;
-int interval = 500;
+int interval = 1000;
 
 
-const byte initialSnakeSize = 6;
 
 
 byte score = 0;
 
 byte buttonState = 0;
 
+boolean paused = false;
 
 //direction flags w/ initial flag
 boolean upward = false, rightward = true, downward = false, leftward = false;
 
 //snake body properties
-byte x[150], y[150], d[150], snakeSize = initialSnakeSize;
+byte x[150], y[150], d[150], snakeSize = INITIAL_SNAKE_SIZE;
 
 int Buzzer;
 
@@ -108,24 +110,30 @@ void setup()   {
 }
 
 
-void loop() {
-
+void loop()
+{
   steering();
 
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - previousMillis > interval)
+  if (!paused)
   {
-    previousMillis = currentMillis;
+    unsigned long currentMillis = millis();
 
-    //Serial.print("flag\n");
-    moveSnake();
-    if(!checkCollision())
+    if (currentMillis - previousMillis > interval)
     {
-          drawSnake();
+      previousMillis = currentMillis;
+
+      //Serial.print("flag\n");
+      moveSnake();
+      if (!collision())
+      {
+        drawSnake();
+      }
+      else
+      {
+        paused = true;
+      }
     }
   }
-
 }
 
 
@@ -260,7 +268,7 @@ void moveSnake()
 
 }
 
-boolean checkCollision()
+boolean collision()
 {
   //check head collision
   byte i;
@@ -269,13 +277,13 @@ boolean checkCollision()
     if (x[i] == x[0] && y[i] == y[0])
     {
       //game over
-      score = snakeSize - initialSnakeSize;
-      
+      score = snakeSize - INITIAL_SNAKE_SIZE;
+
       display.fillRect(14, 14, 55, 18, WHITE);
-      
-      display.setTextColor(BLACK);   
+
+      display.setTextColor(BLACK);
       display.setTextSize(1);
-      
+
       display.setCursor(15, 15);
       display.print("Game Over");
 
@@ -290,9 +298,9 @@ boolean checkCollision()
         display.print("score:");
       }
       display.print(score);
-      
+
       display.display();
-      interval = 20000;
+
       return true;
     }
   }
