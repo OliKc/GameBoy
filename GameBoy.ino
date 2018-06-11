@@ -130,9 +130,8 @@ void setup()   {
 
 
 void loop() {
-  //buttonState = digitalRead(UP);
 
-  snakeDirection();
+  steering();
 
   unsigned long currentMillis = millis();
 
@@ -148,7 +147,7 @@ void loop() {
 }
 
 
-void snakeDirection()
+void steering()
 {
   if (digitalRead(UP) == HIGH) {
     upward = true;
@@ -252,14 +251,11 @@ void moveSnake()
     x[i] = tempx;
     y[i] = tempy;
     d[i] = tempd;
-    //Serial.println(x[i]);
-    //Serial.println(y[i]);
     tempx = xx;
     tempy = yy;
     tempd = dd;
   }
 
-  //Serial.print(tempx);
   Serial.print('\n');
 
 }
