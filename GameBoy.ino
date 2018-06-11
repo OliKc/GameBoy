@@ -14,8 +14,10 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define AREAWIDTH 84
 #define AREAHEIGHT 47     //1px trimmed
 
-#define SEGMENTSIZE 5
-#define SEGMENTCOUNT 144  //16*9
+#define SEGMENT_SIZE 5
+#define SEGMENTS_WIDTH 16
+#define SEGMENTS_HEIGHT 9
+#define SEGMENT_COUNT 144 //16*9
 
 //D pad pins
 #define UP 8
@@ -39,7 +41,13 @@ byte score = 0;
 byte buttonState = 0;
 
 boolean paused = false;
+
+
+byte xegg;
+byte yegg;
 boolean egg = false;
+
+
 
 //direction flags w/ initial flag
 boolean
@@ -48,11 +56,14 @@ rightward = true,
 downward = false,
 leftward = false;
 
+byte x_anchor[SEGMENTS_WIDTH];
+byte y_anchor[SEGMENTS_HEIGHT];
+
 //snake body properties
 byte
-x[SEGMENTCOUNT],
-y[SEGMENTCOUNT],
-d[SEGMENTCOUNT],
+x[SEGMENT_COUNT],
+y[SEGMENT_COUNT],
+d[SEGMENT_COUNT],
 snakeSize = INITIAL_SNAKE_SIZE;
 
 int Buzzer;
@@ -89,13 +100,22 @@ void setup()
   display.drawLine(1, 0, 1, AREAHEIGHT - 1, BLACK);
   display.drawLine(AREAWIDTH - 2, 0, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
 
+  byte i;
+
+  //fill anchors
+  for (i = 0; i < SEGMENTS_WIDTH; i++) {
+    x_anchor[i] = i * 5 + 2;
+  }
+  for (i = 0; i < SEGMENTS_HEIGHT; i++) {
+    y_anchor[i] = i * 5 + 1;
+  }
+  
 
   //initial snake position
-  int i;
   for (i = 0; i < snakeSize; i++)
   {
-    x[i] = (6 * SEGMENTSIZE + 2) - i * 5; //2+5n - 5i
-    y[i] = (4 * SEGMENTSIZE + 1);         //1+5n
+    x[i] = (6 * SEGMENT_SIZE + 2) - i * 5; //(a * 5 + 2) - 5i
+    y[i] = (4 * SEGMENT_SIZE + 1);         //(b * 5 + 1)
   }
 
   //draw start head
@@ -212,11 +232,11 @@ void moveSnake()
   if (upward == true)
   {
     //Serial.print("upward\n");
-    if (y[0] - SEGMENTSIZE < 1) {
-      tempy = AREAHEIGHT - SEGMENTSIZE - 1;
+    if (y[0] - SEGMENT_SIZE < 1) {
+      tempy = AREAHEIGHT - SEGMENT_SIZE - 1;
     }
     else {
-      tempy = y[0] - SEGMENTSIZE;
+      tempy = y[0] - SEGMENT_SIZE;
     }
     tempx = x[0];
     tempd = UP_DIRECTION;
@@ -226,11 +246,11 @@ void moveSnake()
   else if (rightward == true)
   {
     //Serial.print("rightward\n");
-    if (x[0] + SEGMENTSIZE > AREAWIDTH - SEGMENTSIZE - 2) {
+    if (x[0] + SEGMENT_SIZE > AREAWIDTH - SEGMENT_SIZE - 2) {
       tempx = 2;
     }
     else {
-      tempx = x[0] + SEGMENTSIZE;
+      tempx = x[0] + SEGMENT_SIZE;
     }
     tempy = y[0];
     tempd = RIGHT_DIRECTION;
@@ -240,11 +260,11 @@ void moveSnake()
   else if (downward == true)
   {
     //Serial.print("downward\n");
-    if (y[0] + SEGMENTSIZE > AREAHEIGHT - SEGMENTSIZE - 1) {
+    if (y[0] + SEGMENT_SIZE > AREAHEIGHT - SEGMENT_SIZE - 1) {
       tempy = 1;
     }
     else {
-      tempy = y[0] + SEGMENTSIZE;
+      tempy = y[0] + SEGMENT_SIZE;
     }
     tempx = x[0];
     tempd = DOWN_DIRECTION;
@@ -254,11 +274,11 @@ void moveSnake()
   else if (leftward == true)
   {
     //Serial.print("leftward\n");
-    if (x[0] - SEGMENTSIZE < 2) {
-      tempx = AREAWIDTH - SEGMENTSIZE - 2;
+    if (x[0] - SEGMENT_SIZE < 2) {
+      tempx = AREAWIDTH - SEGMENT_SIZE - 2;
     }
     else {
-      tempx = x[0] - SEGMENTSIZE;
+      tempx = x[0] - SEGMENT_SIZE;
     }
     tempy = y[0];
     tempd = LEFT_DIRECTION;
@@ -279,9 +299,6 @@ void moveSnake()
     tempy = _y;
     tempd = _d;
   }
-
-  //Serial.print('\n');
-
 }
 
 boolean collision()
@@ -446,12 +463,12 @@ void drawSnake()
 void addEgg()
 {
   byte i, j;
-  for (i = 0; i < SEGMENTCOUNT; i++)
+  for (i = 0; i < SEGMENT_COUNT; i++)
   {
-    for (j = 0; j < SEGMENTCOUNT; j++)
-    {
+      if (!x[i] && !y[i])
+      {
 
-    }
+      }
   }
 }
 
