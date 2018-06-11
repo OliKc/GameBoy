@@ -62,7 +62,7 @@ const byte LEFT = 11;
 byte buttonState = 0;
 
 
-//direction flags
+//direction flags w/ initial flag
 boolean upward = false, rightward = true, downward = false, leftward = false;
 
 //snake body properties
@@ -180,23 +180,6 @@ void moveSnake()
 {
   byte tempx, tempy, tempd;
 
-  //if no key pressed
-//  if (!upward && !rightward && !downward && !leftward)
-//  {
-//    Serial.print("NO KEY PRESSED ");
-//    if (d[0] == UP_DIRECTION) {
-//      upward = true;
-//    }
-//    else if (d[0] == RIGHT_DIRECTION) {
-//      rightward = true;
-//    }
-//    else if (d[0] == DOWN_DIRECTION) {
-//      downward = true;
-//    }
-//    else if (d[0] == LEFT_DIRECTION) {
-//      leftward = true;
-//    }
-//  }
   //if wrong key pressed - impossible move
   if (d[0] == UP_DIRECTION && downward == true) {
     downward = false;
@@ -232,7 +215,6 @@ void moveSnake()
     tempx = x[0];
     tempy = y[0] - 5;
     tempd = UP_DIRECTION;
-    //upward = false;
   }
   //move right
   else if (rightward == true)
@@ -241,7 +223,6 @@ void moveSnake()
     tempx = x[0] + 5;
     tempy = y[0];
     tempd = RIGHT_DIRECTION;
-    //rightward = false;
   }
   //move down
   else if (downward == true)
@@ -250,7 +231,6 @@ void moveSnake()
     tempx = x[0];
     tempy = y[0] + 5;
     tempd = DOWN_DIRECTION;
-    //downward = false;
   }
   //move left
   else if (leftward == true)
@@ -259,7 +239,6 @@ void moveSnake()
     tempx = x[0] - 5;
     tempy = y[0];
     tempd = LEFT_DIRECTION;
-    //leftward = false;
   }
 
 
