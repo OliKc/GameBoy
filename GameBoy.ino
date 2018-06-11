@@ -1,23 +1,6 @@
-/*********************************************************************
-  This is an example sketch for our Monochrome Nokia 5110 LCD Displays
-
-  Pick one up today in the adafruit shop!
-  ------> http://www.adafruit.com/products/338
-
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface
-
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada  for Adafruit Industries.
-  BSD license, check license.txt for more information
-  All text above, and the splash screen must be included in any redistribution
-*********************************************************************/
-
 #include <SPI.h>
 #include <Adafruit_GFX.h>
+//Written by Limor Fried/Ladyada  for Adafruit Industries.
 #include <Adafruit_PCD8544.h>
 
 // Software SPI (slower updates, more flexible pin options):
@@ -41,6 +24,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 
 #define AREAWIDTH 84
 #define AREAHEIGHT 47
+#define SEGMENTSIZE 5
 
 
 const byte UP_DIRECTION = 0;
@@ -66,7 +50,8 @@ byte buttonState = 0;
 boolean upward = false, rightward = true, downward = false, leftward = false;
 
 //snake body properties
-byte x[150], y[150], d[150], snakeLength = 6;
+int x[150], y[150];
+byte d[150], snakeLength = 6;
 
 int Buzzer;
 
@@ -92,8 +77,8 @@ void setup()   {
 
 
   //draw horizontal borders
-  display.drawLine(0, 0, AREAWIDTH - 1, 0, BLACK);
-  display.drawLine(0, AREAHEIGHT - 1, AREAWIDTH - 1, AREAHEIGHT - 1, BLACK);
+  display.drawLine(1, 0, AREAWIDTH - 2, 0, BLACK);
+  display.drawLine(1, AREAHEIGHT - 1, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
 
   //draw vertical borders
   display.drawLine(1, 0, 1, AREAHEIGHT - 1, BLACK);
@@ -107,11 +92,11 @@ void setup()   {
     y[i] = 21;          //1+5n
   }
 
-  //draw head
+  //draw start head
   display.fillRoundRect(x[0], y[0] + 1, 5, 3, 1, BLACK);
   d[0] = RIGHT_DIRECTION;
 
-  //draw body
+  //draw start body
   for (i = 1; i < snakeLength - 1; i++)
   {
     display.drawPixel(x[i], y[i] + 2, BLACK);
@@ -119,11 +104,10 @@ void setup()   {
     d[i] = RIGHT_DIRECTION;
   }
 
-  //draw tail
+  //draw start tail
   display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 2, 2, 1, BLACK);
   display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 1, 3, 3, BLACK);
   d[snakeLength - 1] = RIGHT_DIRECTION;
-
 
   display.display();
 }
@@ -183,59 +167,82 @@ void moveSnake()
   if (d[0] == UP_DIRECTION && downward == true) {
     downward = false;
     upward = true;
-//    Serial.println('a');
+    //    Serial.println('a');
   }
   else if (d[0] == RIGHT_DIRECTION && leftward == true) {
     leftward = false;
     rightward = true;
-//    Serial.println('b');
+    //    Serial.println('b');
   }
   else if (d[0] == DOWN_DIRECTION && upward == true) {
     upward = false;
     downward = true;
-//    Serial.println('c');
+    //    Serial.println('c');
   }
   else if (d[0] == LEFT_DIRECTION && rightward == true) {
     rightward = false;
     leftward = true;
-//    Serial.println('d');
+    //    Serial.println('d');
   }
 
   //  Serial.println(d[0]);
-    Serial.println(upward);
-    Serial.println(rightward);
-    Serial.println(downward);
-    Serial.println(leftward);
+  Serial.println(upward);
+  Serial.println(rightward);
+  Serial.println(downward);
+  Serial.println(leftward);
 
   //move up
   if (upward == true)
   {
     //Serial.print("upward\n");
+    if (y[0] - SEGMENTSIZE < 1) {
+      tempy = AREAHEIGHT - SEGMENTSIZE - 1;
+    }
+    else {
+      tempy = y[0] - SEGMENTSIZE;
+    }
     tempx = x[0];
-    tempy = y[0] - 5;
     tempd = UP_DIRECTION;
   }
+
   //move right
   else if (rightward == true)
   {
     //Serial.print("rightward\n");
-    tempx = x[0] + 5;
+    if (x[0] + SEGMENTSIZE > AREAWIDTH - SEGMENTSIZE - 2) {
+      tempx = 2;
+    }
+    else {
+      tempx = x[0] + SEGMENTSIZE;
+    }
     tempy = y[0];
     tempd = RIGHT_DIRECTION;
   }
+
   //move down
   else if (downward == true)
   {
     //Serial.print("downward\n");
+    if (y[0] + SEGMENTSIZE > AREAHEIGHT - SEGMENTSIZE - 1) {
+      tempy = 1;
+    }
+    else {
+      tempy = y[0] + SEGMENTSIZE;
+    }
     tempx = x[0];
-    tempy = y[0] + 5;
     tempd = DOWN_DIRECTION;
   }
+
   //move left
   else if (leftward == true)
   {
     //Serial.print("leftward\n");
-    tempx = x[0] - 5;
+    if (x[0] - SEGMENTSIZE < 2) {
+      tempx = AREAWIDTH - SEGMENTSIZE - 2;
+    }
+    else {
+      tempx = x[0] - SEGMENTSIZE;
+    }
     tempy = y[0];
     tempd = LEFT_DIRECTION;
   }
