@@ -30,7 +30,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define DOWN_DIRECTION 2
 #define LEFT_DIRECTION 3
 
-#define INITIAL_SNAKE_SIZE 6
+#define INITIAL_SNAKE_LENGTH 6
 
 long previousMillis = 0;
 int interval = 1000;
@@ -56,15 +56,15 @@ rightward = true,
 downward = false,
 leftward = false;
 
-byte x_anchor[SEGMENTS_WIDTH];
-byte y_anchor[SEGMENTS_HEIGHT];
+byte anchor_x[SEGMENTS_WIDTH];
+byte anchor_y[SEGMENTS_HEIGHT];
 
 //snake body properties
 byte
 x[SEGMENT_COUNT],
 y[SEGMENT_COUNT],
 d[SEGMENT_COUNT],
-snakeLength = INITIAL_SNAKE_SIZE;
+snakeLength = INITIAL_SNAKE_LENGTH;
 
 int Buzzer;
 
@@ -100,43 +100,32 @@ void setup()
   display.drawLine(1, 0, 1, AREAHEIGHT - 1, BLACK);
   display.drawLine(AREAWIDTH - 2, 0, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
 
+  display.display();
+
+
   byte i;
 
   //fill anchors
   for (i = 0; i < SEGMENTS_WIDTH; i++) {
-    x_anchor[i] = i * 5 + 2;
+    anchor_x[i] = i * 5 + 2;
+    //Serial.println(anchor_x[i]);
   }
+  //Serial.println();
   for (i = 0; i < SEGMENTS_HEIGHT; i++) {
-    y_anchor[i] = i * 5 + 1;
-  }
-  
-
-  //initial snake position
-  for (i = 0; i < snakeLength; i++)
-  {
-    x[i] = (6 * SEGMENT_SIZE + 2) - i * 5; //(a * 5 + 2) - 5i
-    y[i] = (4 * SEGMENT_SIZE + 1);         //(b * 5 + 1)
+    anchor_y[i] = i * 5 + 1;
+    //Serial.println(anchor_y[i]);
   }
 
-  //draw start head
-  display.fillRoundRect(x[0], y[0] + 1, 5, 3, 1, BLACK);
-  d[0] = RIGHT_DIRECTION;
 
-  //draw start body
-  for (i = 1; i < snakeLength - 1; i++)
+  //initial snake properties
+  for (i = 0; i < INITIAL_SNAKE_LENGTH; i++)
   {
-    display.drawPixel(x[i], y[i] + 2, BLACK);
-    display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
+    x[i] = anchor_x[6 - i];
+    y[i] = anchor_y[4];
     d[i] = RIGHT_DIRECTION;
   }
 
-  //draw start tail
-  display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 2, 2, 1, BLACK);
-  display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 1, 3, 3, BLACK);
-  d[snakeLength - 1] = RIGHT_DIRECTION;
-
-
-  display.display();
+  drawSnake();
 }
 
 
@@ -150,24 +139,23 @@ void loop()
 
     if (currentMillis - previousMillis > interval)
     {
-      previousMillis = currentMillis;
+      if (!egg) {
+        addEgg();
+      }
+
 
       //Serial.print("flag\n");
-      moveSnake();
+      //moveSnake();
       if (!collision())
       {
-        drawSnake();
-
-        if (!egg) {
-          Serial.println("jajko");
-          addEgg();
-        }
+        //drawSnake();
 
       }
       else
       {
         paused = true;
       }
+      previousMillis = currentMillis;
     }
   }
 }
@@ -310,7 +298,7 @@ boolean collision()
     if (x[i] == x[0] && y[i] == y[0])
     {
       //game over
-      score = snakeLength - INITIAL_SNAKE_SIZE;
+      score = snakeLength - INITIAL_SNAKE_LENGTH;
 
       display.fillRect(14, 14, 55, 18, WHITE);
 
@@ -343,11 +331,11 @@ boolean collision()
 void drawSnake()
 {
   //clear excess tail
-  display.fillRect(x[snakeLength], y[snakeLength], 5, 5, WHITE);
+  //display.fillRect(x[snakeLength], y[snakeLength], 5, 5, WHITE);
 
   //reset excess tail properties
-  x[snakeLength] = 0; //or :=NULL
-  y[snakeLength] = 0; //or :=NULL
+  //x[snakeLength] = 0; //or :=NULL
+  //y[snakeLength] = 0; //or :=NULL
 
 
   //draw head
@@ -462,18 +450,35 @@ void drawSnake()
 
 void addEgg()
 {
-  byte availablePosition[SEGMENT_COUNT];
+  byte available_x[SEGMENT_COUNT - snakeLength];
+  byte available_y[SEGMENT_COUNT - snakeLength];
 
+  byte i, j = 0;
+  //byte _x, _y;
+  byte a_xi = 0, a_yi = 0;
 
-  
-  byte i, j;
-  for (i = 0; i < SEGMENTS_HEIGHT; i++)
+  for (i = 0; i < SEGMENT_COUNT; i++)
   {
-    for (j = 0; j < SEGMENTS_WIDTH; j++)
+    if (a_xi >= SEGMENTS_WIDTH)
     {
-      
+      a_xi = 0;
+      a_yi++;
     }
+    if (anchor_x[a_xi] != x[i] && anchor_y[a_yi] != y[i])
+    {
+      available_x[j] = anchor_x[a_xi];
+      available_y[j] = anchor_y[a_yi];
+      //Serial.println(available_x[j]);
+      j++;
+    }
+    a_xi++;
   }
+  //Serial.println();
+
+egg = true;
+  Serial.println(SEGMENT_COUNT - snakeLength);
+  Serial.println(j);
+  Serial.println();
 }
 
 
