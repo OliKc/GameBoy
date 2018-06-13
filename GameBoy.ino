@@ -48,9 +48,9 @@ byte egg_y;
 boolean egg = false;
 
 
-//direction flags w/ initial flag
+//direction flags
 boolean upward = false;
-boolean rightward = true;
+boolean rightward = false;
 boolean downward = false;
 boolean leftward = false;
 
@@ -61,6 +61,7 @@ byte anchor_y[SEGMENTS_HEIGHT];
 byte x[SEGMENT_COUNT];
 byte y[SEGMENT_COUNT];
 byte d[SEGMENT_COUNT];
+boolean eats[SEGMENT_COUNT];
 byte snakeLength = INITIAL_SNAKE_LENGTH;
 byte excessTail_x;
 byte excessTail_y;
@@ -88,11 +89,10 @@ void setup()
 
   Serial.begin(9600);
 
-
+  //init display
   display.begin();
   display.clearDisplay();
   display.setContrast(55);
-
 
   //draw horizontal borders
   display.drawLine(1, 0, AREAWIDTH - 2, 0, BLACK);
@@ -122,6 +122,8 @@ void setup()
     d[i] = RIGHT_DIRECTION;
   }
 
+  rightward = true;
+
   draw();
 }
 
@@ -138,12 +140,12 @@ void loop()
     {
       moveSnake();
 
-      if (!collision())
+      if (!collisions())
       {
         if (!egg) {
           addEgg();
         }
-        
+
         draw();
       }
       else
@@ -188,8 +190,6 @@ void steering()
 
 void moveSnake()
 {
-  byte tempx, tempy, tempd;
-
   //if wrong key pressed - impossible move
   if (d[0] == UP_DIRECTION && downward == true) {
     downward = false;
@@ -212,18 +212,21 @@ void moveSnake()
     //    Serial.println('d');
   }
 
+
+  byte temp_x, temp_y, temp_d, temp_eats = eats[0];
+
   //move up
   if (upward == true)
   {
     //Serial.print("upward\n");
     if (y[0] - SEGMENT_SIZE < 1) {
-      tempy = AREAHEIGHT - SEGMENT_SIZE - 1;
+      temp_y = AREAHEIGHT - SEGMENT_SIZE - 1;
     }
     else {
-      tempy = y[0] - SEGMENT_SIZE;
+      temp_y = y[0] - SEGMENT_SIZE;
     }
-    tempx = x[0];
-    tempd = UP_DIRECTION;
+    temp_x = x[0];
+    temp_d = UP_DIRECTION;
   }
 
   //move right
@@ -231,13 +234,13 @@ void moveSnake()
   {
     //Serial.print("rightward\n");
     if (x[0] + SEGMENT_SIZE > AREAWIDTH - SEGMENT_SIZE - 2) {
-      tempx = 2;
+      temp_x = 2;
     }
     else {
-      tempx = x[0] + SEGMENT_SIZE;
+      temp_x = x[0] + SEGMENT_SIZE;
     }
-    tempy = y[0];
-    tempd = RIGHT_DIRECTION;
+    temp_y = y[0];
+    temp_d = RIGHT_DIRECTION;
   }
 
   //move down
@@ -245,13 +248,13 @@ void moveSnake()
   {
     //Serial.print("downward\n");
     if (y[0] + SEGMENT_SIZE > AREAHEIGHT - SEGMENT_SIZE - 1) {
-      tempy = 1;
+      temp_y = 1;
     }
     else {
-      tempy = y[0] + SEGMENT_SIZE;
+      temp_y = y[0] + SEGMENT_SIZE;
     }
-    tempx = x[0];
-    tempd = DOWN_DIRECTION;
+    temp_x = x[0];
+    temp_d = DOWN_DIRECTION;
   }
 
   //move left
@@ -259,13 +262,13 @@ void moveSnake()
   {
     //Serial.print("leftward\n");
     if (x[0] - SEGMENT_SIZE < 2) {
-      tempx = AREAWIDTH - SEGMENT_SIZE - 2;
+      temp_x = AREAWIDTH - SEGMENT_SIZE - 2;
     }
     else {
-      tempx = x[0] - SEGMENT_SIZE;
+      temp_x = x[0] - SEGMENT_SIZE;
     }
-    tempy = y[0];
-    tempd = LEFT_DIRECTION;
+    temp_y = y[0];
+    temp_d = LEFT_DIRECTION;
   }
 
 
@@ -276,13 +279,19 @@ void moveSnake()
     byte _x = x[i];
     byte _y = y[i];
     byte _d = d[i];
-    x[i] = tempx;
-    y[i] = tempy;
-    d[i] = tempd;
-    tempx = _x;
-    tempy = _y;
-    tempd = _d;
+    boolean _eats = eats[i];
+
+    x[i] = temp_x;
+    y[i] = temp_y;
+    d[i] = temp_d;
+    eats[i] = temp_eats;
+
+    temp_x = _x;
+    temp_y = _y;
+    temp_d = _d;
+    temp_eats = _eats;
   }
+
 
   excessTail_x = x[snakeLength];
   excessTail_y = y[snakeLength];
@@ -292,19 +301,31 @@ void moveSnake()
   y[snakeLength] = 0; //or :=NULL
 }
 
-boolean collision()
+
+boolean collisions()
 {
-  //check head collision
   byte i;
   for (i = 1; i < snakeLength; i++)
   {
+    //check head collision
     if (x[i] == x[0] && y[i] == y[0])
     {
       return true;
     }
   }
+
+  //snake eats egg
+  if (x[0] == egg_x && y[0] == egg_y)
+  {
+    eats[0] = true;
+  }
+  else {
+    eats[0] = false;
+  }
+
   return false;
 }
+
 
 void draw()
 {
@@ -315,7 +336,7 @@ void draw()
 
 
   //draw egg
-  if (egg_x) {
+  if (egg) {
     display.drawCircle(egg_x + 2, egg_y + 2, 1, BLACK);
   }
 
@@ -357,35 +378,50 @@ void draw()
 
     if (d[i] == UP_DIRECTION)
     {
-      //      Serial.print("UP\n");
-      //      Serial.println(x[i]);
-      //      Serial.println(y[i]);
-      display.fillRect(x[i] + 1, y[i], 3, 4, BLACK);
-      display.drawPixel(x[i] + 2, y[i] + 4, BLACK);
+      if (eats[i])
+      {
+
+      }
+      else {
+        display.fillRect(x[i] + 1, y[i], 3, 4, BLACK);
+        display.drawPixel(x[i] + 2, y[i] + 4, BLACK);
+      }
     }
     else if (d[i] == RIGHT_DIRECTION)
     {
-      //      Serial.print("RIGHT\n");
-      //      Serial.println(x[i]);
-      //      Serial.println(y[i]);
-      display.drawPixel(x[i], y[i] + 2, BLACK);
-      display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
+      if (eats[i])
+      {
+        display.drawPixel(x[i], y[i] + 2, BLACK);
+        display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
+      }
+      else {
+        display.drawPixel(x[i], y[i] + 2, BLACK);
+        display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
+        display.fillRect(x[i] + 2, y[i], 2, 5, BLACK);
+      }
     }
     else if (d[i] == DOWN_DIRECTION)
     {
-      //      Serial.print("DOWN\n");
-      //      Serial.println(x[i]);
-      //      Serial.println(y[i]);
-      display.drawPixel(x[i] + 2, y[i], BLACK);
-      display.fillRect(x[i] + 1, y[i] + 1, 3, 4, BLACK);
+      if (eats[i])
+      {
+
+      }
+      else {
+        display.drawPixel(x[i] + 2, y[i], BLACK);
+        display.fillRect(x[i] + 1, y[i] + 1, 3, 4, BLACK);
+      }
+
     }
     else if (d[i] == LEFT_DIRECTION)
     {
-      //      Serial.print("LEFT\n");
-      //      Serial.println(x[i]);
-      //      Serial.println(y[i]);
-      display.fillRect(x[i], y[i] + 1, 4, 3, BLACK);
-      display.drawPixel(x[i] + 4, y[i] + 2, BLACK);
+      if (eats[i])
+      {
+
+      }
+      else {
+        display.fillRect(x[i], y[i] + 1, 4, 3, BLACK);
+        display.drawPixel(x[i] + 4, y[i] + 2, BLACK);
+      }
     }
     else
     {
@@ -499,7 +535,7 @@ void gameOver()
   display.print("Game Over");
 
   display.setCursor(15, 24);
-  
+
   if (score < 10) {
     display.print("score:  ");
   }
@@ -509,8 +545,11 @@ void gameOver()
   else {
     display.print("score:");
   }
-  
+
   display.print(score);
 
   display.display();
+
+  //if again button pressed
+  //setup();
 }
