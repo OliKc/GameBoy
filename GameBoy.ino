@@ -63,7 +63,7 @@ byte y[SEGMENT_COUNT];
 byte d[SEGMENT_COUNT];
 boolean eats[SEGMENT_COUNT];
 byte snakeLength = INITIAL_SNAKE_LENGTH;
-byte excessTail_x;
+byte excessTail_x = 0;
 byte excessTail_y;
 
 
@@ -194,22 +194,18 @@ void moveSnake()
   if (d[0] == UP_DIRECTION && downward == true) {
     downward = false;
     upward = true;
-    //    Serial.println('a');
   }
   else if (d[0] == RIGHT_DIRECTION && leftward == true) {
     leftward = false;
     rightward = true;
-    //    Serial.println('b');
   }
   else if (d[0] == DOWN_DIRECTION && upward == true) {
     upward = false;
     downward = true;
-    //    Serial.println('c');
   }
   else if (d[0] == LEFT_DIRECTION && rightward == true) {
     rightward = false;
     leftward = true;
-    //    Serial.println('d');
   }
 
 
@@ -299,6 +295,7 @@ void moveSnake()
   //reset excess tail properties
   x[snakeLength] = 0; //or :=NULL
   y[snakeLength] = 0; //or :=NULL
+  eats[snakeLength] = false; //?
 }
 
 
@@ -343,24 +340,26 @@ void draw()
 
   //draw head
   display.fillRect(x[0], y[0], 5, 5, WHITE);
-  if (d[0] == UP_DIRECTION)
+  if (eats[0])
   {
-    //    Serial.print("head UP\n");
+    display.fillRect(x[0], y[0] + 2, 5, 1, BLACK);
+    display.fillRect(x[0] + 1, y[0] + 1, 3, 3, BLACK);
+    display.fillRect(x[0] + 2, y[0], 1, 5, BLACK);
+  }
+  else if (d[0] == UP_DIRECTION)
+  {
     display.fillRoundRect(x[0] + 1, y[0], 3, 5, 1, BLACK);
   }
   else if (d[0] == RIGHT_DIRECTION)
   {
-    //    Serial.print("head RIGHT\n");
     display.fillRoundRect(x[0], y[0] + 1, 5, 3, 1, BLACK);
   }
   else if (d[0] == DOWN_DIRECTION)
   {
-    //    Serial.print("head DOWN\n");
     display.fillRoundRect(x[0] + 1, y[0], 3, 5, 1, BLACK);
   }
   else if (d[0] == LEFT_DIRECTION)
   {
-    //    Serial.print("head LEFT\n");
     display.fillRoundRect(x[0], y[0] + 1, 5, 3, 1, BLACK);
   }
   else
@@ -380,7 +379,9 @@ void draw()
     {
       if (eats[i])
       {
-
+        display.fillRect(x[i], y[i] + 1, 5, 2, BLACK);
+        display.fillRect(x[i] + 1, y[i], 3, 4, BLACK);
+        display.drawPixel(x[i] + 2, y[i] + 4, BLACK);
       }
       else {
         display.fillRect(x[i] + 1, y[i], 3, 4, BLACK);
@@ -394,7 +395,6 @@ void draw()
         display.drawPixel(x[i], y[i] + 2, BLACK);
         display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
         display.fillRect(x[i] + 2, y[i], 2, 5, BLACK);
-
       }
       else {
         display.drawPixel(x[i], y[i] + 2, BLACK);
@@ -405,7 +405,9 @@ void draw()
     {
       if (eats[i])
       {
-
+        display.fillRect(x[i], y[i] + 2, 5, 2, BLACK);
+        display.fillRect(x[i] + 1, y[i] + 1, 3, 4, BLACK);
+        display.drawPixel(x[i] + 2, y[i], BLACK);
       }
       else {
         display.drawPixel(x[i] + 2, y[i], BLACK);
@@ -417,7 +419,9 @@ void draw()
     {
       if (eats[i])
       {
-
+        display.fillRect(x[i], y[i] + 1, 4, 3, BLACK);
+        display.fillRect(x[i] + 1, y[i], 2, 5, BLACK);
+        display.drawPixel(x[i] + 4, y[i] + 2, BLACK);
       }
       else {
         display.fillRect(x[i], y[i] + 1, 4, 3, BLACK);
@@ -436,27 +440,55 @@ void draw()
   display.fillRect(x[snakeLength - 1], y[snakeLength - 1], 5, 5, WHITE);
   if (d[snakeLength - 1] == UP_DIRECTION)
   {
-    //    Serial.print("tail UP\n");
-    display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1], 3, 3, BLACK);
-    display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 3, 1, 2, BLACK);
+    if (eats[i])
+    {
+      display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 1, 5, 2, BLACK);
+      display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1], 3, 4, BLACK);
+      display.drawPixel(x[snakeLength - 1] + 2, y[snakeLength - 1] + 4, BLACK);
+    }
+    else {
+      display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1], 3, 3, BLACK);
+      display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 3, 1, 2, BLACK);
+    }
   }
   else if (d[snakeLength - 1] == RIGHT_DIRECTION)
   {
-    //    Serial.print("tail RIGHT\n");
-    display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 2, 2, 1, BLACK);
-    display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 1, 3, 3, BLACK);
+    if (eats[i])
+    {
+      display.drawPixel(x[snakeLength - 1], y[snakeLength - 1] + 2, BLACK);
+      display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1] + 1, 4, 3, BLACK);
+      display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1], 2, 5, BLACK);
+    }
+    else {
+      display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 2, 2, 1, BLACK);
+      display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1] + 1, 3, 3, BLACK);
+    }
   }
   else if (d[snakeLength - 1] == DOWN_DIRECTION)
   {
-    //    Serial.print("tail DOWN\n");
-    display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1], 1, 2, BLACK);
-    display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1] + 2, 3, 3, BLACK);
+    if (eats[i])
+    {
+      display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 2, 5, 2, BLACK);
+      display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1] + 1, 3, 4, BLACK);
+      display.drawPixel(x[snakeLength - 1] + 2, y[snakeLength - 1], BLACK);
+    }
+    else {
+      display.fillRect(x[snakeLength - 1] + 2, y[snakeLength - 1], 1, 2, BLACK);
+      display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1] + 2, 3, 3, BLACK);
+    }
   }
   else if (d[snakeLength - 1] == LEFT_DIRECTION)
   {
-    //    Serial.print("tail LEFT\n");
-    display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 1, 3, 3, BLACK);
-    display.fillRect(x[snakeLength - 1] + 3, y[snakeLength - 1] + 2, 2, 1, BLACK);
+    if (eats[i])
+    {
+      display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 1, 4, 3, BLACK);
+      display.fillRect(x[snakeLength - 1] + 1, y[snakeLength - 1], 2, 5, BLACK);
+      display.drawPixel(x[snakeLength - 1] + 4, y[snakeLength - 1] + 2, BLACK);
+    }
+    else {
+      display.fillRect(x[snakeLength - 1], y[snakeLength - 1] + 1, 3, 3, BLACK);
+      display.fillRect(x[snakeLength - 1] + 3, y[snakeLength - 1] + 2, 2, 1, BLACK);
+    }
   }
   else
   {
@@ -552,5 +584,7 @@ void gameOver()
   display.display();
 
   //if again button pressed
+  //resetValues();
   //setup();
+  //paused = false;
 }
