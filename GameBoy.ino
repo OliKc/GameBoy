@@ -108,12 +108,12 @@ void setup()
   //fill anchors
   for (i = 0; i < SEGMENTS_WIDTH; i++) {
     anchor_x[i] = i * 5 + 2;
-    //Serial.println(anchor_x[i]);
+    Serial.println(anchor_x[i]);
   }
-  //Serial.println();
+  Serial.println();
   for (i = 0; i < SEGMENTS_HEIGHT; i++) {
     anchor_y[i] = i * 5 + 1;
-    //Serial.println(anchor_y[i]);
+    Serial.println(anchor_y[i]);
   }
 
 
@@ -453,9 +453,10 @@ void addEgg()
   byte available_x[SEGMENT_COUNT - snakeLength];
   byte available_y[SEGMENT_COUNT - snakeLength];
 
-  byte i, j = 0;
+  byte i, ii, j = 0;
   //byte _x, _y;
   byte a_xi = 0, a_yi = 0;
+  boolean available_position;
 
   for (i = 0; i < SEGMENT_COUNT; i++)
   {
@@ -464,20 +465,49 @@ void addEgg()
       a_xi = 0;
       a_yi++;
     }
-    if (anchor_x[a_xi] != x[i] && anchor_y[a_yi] != y[i])
+
+    available_position = true;
+    for (ii = 0; ii < snakeLength; ii++)
     {
+      if (anchor_x[a_xi] == x[ii] && anchor_y[a_yi] == y[ii])//test
+      {
+        available_position = false;
+      }
+    }
+
+    if (available_position)
+    {
+      Serial.println("wpisano do available");
       available_x[j] = anchor_x[a_xi];
       available_y[j] = anchor_y[a_yi];
       //Serial.println(available_x[j]);
       j++;
     }
+    else {
+      Serial.println("!!!SNAKE!!!");
+    }
+
+    Serial.print(a_yi);
+    Serial.print(": ");
+    Serial.println(a_xi);
+
     a_xi++;
   }
+
+
+
+
+  Serial.print(a_yi);
+  Serial.print(": ");
+  Serial.println(a_xi);
+
   //Serial.println();
 
-egg = true;
-  Serial.println(SEGMENT_COUNT - snakeLength);
+  egg = true;
+  Serial.println();
   Serial.println(j);
+  Serial.println(SEGMENT_COUNT - snakeLength);
+
   Serial.println();
 }
 
