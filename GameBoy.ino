@@ -47,7 +47,8 @@ byte egg_x;
 byte egg_y;
 boolean egg = false;
 
-
+byte excessTail_x;
+byte excessTail_y;
 
 //direction flags w/ initial flag
 boolean
@@ -124,7 +125,7 @@ void setup()
     d[i] = RIGHT_DIRECTION;
   }
 
-  drawSnake();
+  draw();
 }
 
 
@@ -138,21 +139,21 @@ void loop()
 
     if (currentMillis - previousMillis > interval)
     {
-      if (!egg) {
-        addEgg();
-      }
-      
       //moveSnake();
-      
+
       if (!collision())
       {
-        //drawSnake();
+        draw();
 
+        if (!egg) {
+          addEgg();
+        }
       }
       else
       {
         paused = true;
       }
+      
       previousMillis = currentMillis;
     }
   }
@@ -326,14 +327,16 @@ boolean collision()
   return false;
 }
 
-void drawSnake()
+void draw()
 {
   //clear excess tail
-  //display.fillRect(x[snakeLength], y[snakeLength], 5, 5, WHITE);
+  if (x[snakeLength]) {
+    display.fillRect(x[snakeLength], y[snakeLength], 5, 5, WHITE);
+  }
 
   //reset excess tail properties
-  //x[snakeLength] = 0; //or :=NULL
-  //y[snakeLength] = 0; //or :=NULL
+  x[snakeLength] = 0; //or :=NULL
+  y[snakeLength] = 0; //or :=NULL
 
 
   //draw head
@@ -469,23 +472,24 @@ void addEgg()
       if (anchor_x[a_xi] == x[ii] && anchor_y[a_yi] == y[ii])//test
       {
         available_position = false;
+        break;
       }
     }
 
     if (available_position)
     {
-//      Serial.println("wpisano do available");
+      //      Serial.println("wpisano do available");
       available_x[j] = anchor_x[a_xi];
       available_y[j] = anchor_y[a_yi];
       j++;
     }
     else {
-//      Serial.println("!!!SNAKE!!!");
+      //      Serial.println("!!!SNAKE!!!");
     }
 
-//    Serial.print(a_yi);
-//    Serial.print(": ");
-//    Serial.println(a_xi);
+    //    Serial.print(a_yi);
+    //    Serial.print(": ");
+    //    Serial.println(a_xi);
 
     a_xi++;
   }
