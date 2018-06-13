@@ -393,11 +393,12 @@ void draw()
       {
         display.drawPixel(x[i], y[i] + 2, BLACK);
         display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
+        display.fillRect(x[i] + 2, y[i], 2, 5, BLACK);
+
       }
       else {
         display.drawPixel(x[i], y[i] + 2, BLACK);
         display.fillRect(x[i] + 1, y[i] + 1, 4, 3, BLACK);
-        display.fillRect(x[i] + 2, y[i], 2, 5, BLACK);
       }
     }
     else if (d[i] == DOWN_DIRECTION)
