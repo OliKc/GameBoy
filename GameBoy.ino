@@ -47,25 +47,24 @@ byte egg_x;
 byte egg_y;
 boolean egg = false;
 
-byte excessTail_x;
-byte excessTail_y;
 
 //direction flags w/ initial flag
-boolean
-upward = false,
-rightward = true,
-downward = false,
-leftward = false;
+boolean upward = false;
+boolean rightward = true;
+boolean downward = false;
+boolean leftward = false;
 
 byte anchor_x[SEGMENTS_WIDTH];
 byte anchor_y[SEGMENTS_HEIGHT];
 
 //snake body properties
-byte
-x[SEGMENT_COUNT],
-y[SEGMENT_COUNT],
-d[SEGMENT_COUNT],
-snakeLength = INITIAL_SNAKE_LENGTH;
+byte x[SEGMENT_COUNT];
+byte y[SEGMENT_COUNT];
+byte d[SEGMENT_COUNT];
+byte snakeLength = INITIAL_SNAKE_LENGTH;
+byte excessTail_x;
+byte excessTail_y;
+
 
 int Buzzer;
 
@@ -107,7 +106,6 @@ void setup()
 
 
   byte i;
-
   //fill anchors
   for (i = 0; i < SEGMENTS_WIDTH; i++) {
     anchor_x[i] = i * 5 + 2;
@@ -115,7 +113,6 @@ void setup()
   for (i = 0; i < SEGMENTS_HEIGHT; i++) {
     anchor_y[i] = i * 5 + 1;
   }
-
 
   //initial snake properties
   for (i = 0; i < INITIAL_SNAKE_LENGTH; i++)
@@ -139,21 +136,22 @@ void loop()
 
     if (currentMillis - previousMillis > interval)
     {
-      //moveSnake();
+      moveSnake();
 
       if (!collision())
       {
-        draw();
-
         if (!egg) {
           addEgg();
         }
+        
+        draw();
       }
       else
       {
+        gameOver();
         paused = true;
       }
-      
+
       previousMillis = currentMillis;
     }
   }
@@ -213,7 +211,6 @@ void moveSnake()
     leftward = true;
     //    Serial.println('d');
   }
-
 
   //move up
   if (upward == true)
@@ -286,6 +283,13 @@ void moveSnake()
     tempy = _y;
     tempd = _d;
   }
+
+  excessTail_x = x[snakeLength];
+  excessTail_y = y[snakeLength];
+
+  //reset excess tail properties
+  x[snakeLength] = 0; //or :=NULL
+  y[snakeLength] = 0; //or :=NULL
 }
 
 boolean collision()
@@ -296,31 +300,6 @@ boolean collision()
   {
     if (x[i] == x[0] && y[i] == y[0])
     {
-      //game over
-      score = snakeLength - INITIAL_SNAKE_LENGTH;
-
-      display.fillRect(14, 14, 55, 18, WHITE);
-
-      display.setTextColor(BLACK);
-      display.setTextSize(1);
-
-      display.setCursor(15, 15);
-      display.print("Game Over");
-
-      display.setCursor(15, 24);
-      if (score < 10) {
-        display.print("score:  ");
-      }
-      else if (score < 100) {
-        display.print("score: ");
-      }
-      else {
-        display.print("score:");
-      }
-      display.print(score);
-
-      display.display();
-
       return true;
     }
   }
@@ -330,13 +309,15 @@ boolean collision()
 void draw()
 {
   //clear excess tail
-  if (x[snakeLength]) {
-    display.fillRect(x[snakeLength], y[snakeLength], 5, 5, WHITE);
+  if (excessTail_x) {
+    display.fillRect(excessTail_x, excessTail_y, 5, 5, WHITE);
   }
 
-  //reset excess tail properties
-  x[snakeLength] = 0; //or :=NULL
-  y[snakeLength] = 0; //or :=NULL
+
+  //draw egg
+  if (egg_x) {
+    display.drawCircle(egg_x + 2, egg_y + 2, 1, BLACK);
+  }
 
 
   //draw head
@@ -469,7 +450,7 @@ void addEgg()
     available_position = true;
     for (ii = 0; ii < snakeLength; ii++)
     {
-      if (anchor_x[a_xi] == x[ii] && anchor_y[a_yi] == y[ii])//test
+      if (anchor_x[a_xi] == x[ii] && anchor_y[a_yi] == y[ii])
       {
         available_position = false;
         break;
@@ -500,10 +481,36 @@ void addEgg()
 
   egg = true;
 
-  Serial.println(randIndex);
-  Serial.println(j);
-  Serial.println(SEGMENT_COUNT - snakeLength);
-
+  //  Serial.println(randIndex);
+  //  Serial.println(j);
+  //  Serial.println(SEGMENT_COUNT - snakeLength);
 }
 
+void gameOver()
+{
+  score = snakeLength - INITIAL_SNAKE_LENGTH;
 
+  display.fillRect(14, 14, 55, 18, WHITE);
+
+  display.setTextColor(BLACK);
+  display.setTextSize(1);
+
+  display.setCursor(15, 15);
+  display.print("Game Over");
+
+  display.setCursor(15, 24);
+  
+  if (score < 10) {
+    display.print("score:  ");
+  }
+  else if (score < 100) {
+    display.print("score: ");
+  }
+  else {
+    display.print("score:");
+  }
+  
+  display.print(score);
+
+  display.display();
+}
