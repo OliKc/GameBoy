@@ -43,8 +43,8 @@ byte buttonState = 0;
 boolean paused = false;
 
 
-byte xegg;
-byte yegg;
+byte egg_x;
+byte egg_y;
 boolean egg = false;
 
 
@@ -74,6 +74,8 @@ int Buzzer;
 
 void setup()
 {
+  randomSeed(analogRead(0));
+
   pinMode(UP, INPUT);
   pinMode(RIGHT, INPUT);
   pinMode(DOWN, INPUT);
@@ -108,12 +110,9 @@ void setup()
   //fill anchors
   for (i = 0; i < SEGMENTS_WIDTH; i++) {
     anchor_x[i] = i * 5 + 2;
-    Serial.println(anchor_x[i]);
   }
-  Serial.println();
   for (i = 0; i < SEGMENTS_HEIGHT; i++) {
     anchor_y[i] = i * 5 + 1;
-    Serial.println(anchor_y[i]);
   }
 
 
@@ -142,10 +141,9 @@ void loop()
       if (!egg) {
         addEgg();
       }
-
-
-      //Serial.print("flag\n");
+      
       //moveSnake();
+      
       if (!collision())
       {
         //drawSnake();
@@ -454,7 +452,6 @@ void addEgg()
   byte available_y[SEGMENT_COUNT - snakeLength];
 
   byte i, ii, j = 0;
-  //byte _x, _y;
   byte a_xi = 0, a_yi = 0;
   boolean available_position;
 
@@ -477,38 +474,32 @@ void addEgg()
 
     if (available_position)
     {
-      Serial.println("wpisano do available");
+//      Serial.println("wpisano do available");
       available_x[j] = anchor_x[a_xi];
       available_y[j] = anchor_y[a_yi];
-      //Serial.println(available_x[j]);
       j++;
     }
     else {
-      Serial.println("!!!SNAKE!!!");
+//      Serial.println("!!!SNAKE!!!");
     }
 
-    Serial.print(a_yi);
-    Serial.print(": ");
-    Serial.println(a_xi);
+//    Serial.print(a_yi);
+//    Serial.print(": ");
+//    Serial.println(a_xi);
 
     a_xi++;
   }
 
-
-
-
-  Serial.print(a_yi);
-  Serial.print(": ");
-  Serial.println(a_xi);
-
-  //Serial.println();
+  byte randIndex = random(0, j - 1);
+  egg_x = available_x[randIndex];
+  egg_y = available_y[randIndex];
 
   egg = true;
-  Serial.println();
+
+  Serial.println(randIndex);
   Serial.println(j);
   Serial.println(SEGMENT_COUNT - snakeLength);
 
-  Serial.println();
 }
 
 
