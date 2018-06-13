@@ -33,7 +33,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define INITIAL_SNAKE_LENGTH 6
 
 long previousMillis = 0;
-int interval = 1000;
+int interval = 2000;
 
 
 byte score;
@@ -139,7 +139,7 @@ void loop()
     if (currentMillis - previousMillis > interval)
     {
       moveSnake();
-
+      Serial.println(snakeLength);
       if (!collisions())
       {
         if (!egg) {
@@ -206,6 +206,23 @@ void moveSnake()
   else if (d[0] == LEFT_DIRECTION && rightward == true) {
     rightward = false;
     leftward = true;
+  }
+
+  Serial.print(eats[0]);
+  Serial.print(eats[1]);
+  Serial.print(eats[2]);
+  Serial.print(eats[3]);
+  Serial.print(eats[4]);
+  Serial.print(eats[5]);
+  Serial.println();
+
+  
+  
+  if (eats[snakeLength])
+  {
+    Serial.print("++");
+    eats[snakeLength] = false;
+    snakeLength = snakeLength + 1;
   }
 
 
@@ -275,16 +292,18 @@ void moveSnake()
     byte _x = x[i];
     byte _y = y[i];
     byte _d = d[i];
-    boolean _eats = eats[i];
 
     x[i] = temp_x;
     y[i] = temp_y;
     d[i] = temp_d;
-    eats[i] = temp_eats;
 
     temp_x = _x;
     temp_y = _y;
     temp_d = _d;
+
+
+    boolean _eats = eats[i];
+    eats[i] = temp_eats;
     temp_eats = _eats;
   }
 
@@ -295,7 +314,8 @@ void moveSnake()
   //reset excess tail properties
   x[snakeLength] = 0; //or :=NULL
   y[snakeLength] = 0; //or :=NULL
-  eats[snakeLength] = false; //?
+  //eats[snakeLength] = false; //?
+  //eats[snakeLength - 1] = false; //?
 }
 
 
@@ -545,8 +565,8 @@ void addEgg()
   }
 
   byte randIndex = random(0, j - 1);
-  egg_x = available_x[randIndex];
-  egg_y = available_y[randIndex];
+  egg_x = 42;//available_x[randIndex];
+  egg_y = 21;//available_y[randIndex];
 
   egg = true;
 
