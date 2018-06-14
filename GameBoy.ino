@@ -50,11 +50,11 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 int interval;
 long previousMillis;
 
+//game properties
 byte score;
+boolean paused;
 
-boolean paused = false;
-
-//egg vals
+//egg properties
 byte egg_x;
 byte egg_y;
 boolean egg;
@@ -65,6 +65,7 @@ boolean rightward;
 boolean downward;
 boolean leftward;
 
+//pixel positions anchors
 byte anchor_x[SEGMENTS_WIDTH];
 byte anchor_y[SEGMENTS_HEIGHT];
 
@@ -279,7 +280,6 @@ void moveSnake()
   //snake length ++
   if (eats[snakeLength - 1])
   {
-    Serial.print("++");
     eats[snakeLength - 1] = false;
     snakeLength++;
   }
@@ -292,17 +292,16 @@ void moveSnake()
     byte _x = x[i];
     byte _y = y[i];
     byte _d = d[i];
+    boolean _eats = eats[i];
 
     x[i] = temp_x;
     y[i] = temp_y;
     d[i] = temp_d;
+    eats[i] = temp_eats;
 
     temp_x = _x;
     temp_y = _y;
     temp_d = _d;
-
-    boolean _eats = eats[i];
-    eats[i] = temp_eats;
     temp_eats = _eats;
   }
 
@@ -380,11 +379,6 @@ void draw()
   {
     display.fillRoundRect(x[0], y[0] + 1, 5, 3, 1, BLACK);
   }
-  else
-  {
-    //error
-    Serial.print("head error\n");
-  }
 
 
   //draw body
@@ -446,11 +440,6 @@ void draw()
         display.drawPixel(x[i] + 4, y[i] + 2, BLACK);
       }
     }
-    else
-    {
-      //error
-      Serial.print("body error\n");
-    }
   }
 
 
@@ -508,11 +497,7 @@ void draw()
       display.fillRect(x[snakeLength - 1] + 3, y[snakeLength - 1] + 2, 2, 1, BLACK);
     }
   }
-  else
-  {
-    //error
-    Serial.print("tail error\n");
-  }
+
 
   display.display();
 }
@@ -589,9 +574,7 @@ void gameOver()
   display.display();
 
   //if again button pressed
-  //resetvals();
   //setup();
-  //paused = false;
 }
 
 void setVals()
@@ -613,5 +596,5 @@ void setVals()
   excessTail_y = 0;
 
   previousMillis = 0;
-  interval = 1000;
+  interval = 750;
 }
