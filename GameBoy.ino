@@ -30,13 +30,13 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define DOWN_DIRECTION 2
 #define LEFT_DIRECTION 3
 
-#define INITIAL_SNAKE_LENGTH 4
+#define INITIAL_SNAKE_LENGTH 6
 
 long previousMillis = 0;
 int interval = 1000;
 
 
-byte score;
+byte score = INITIAL_SNAKE_LENGTH;
 
 byte buttonState = 0;
 
@@ -137,21 +137,12 @@ void loop()
 
     if (currentMillis - previousMillis > interval)
     {
+      moveSnake();
 
       if (!egg) {
         addEgg();
       }
-      
-      moveSnake();
 
-      if (egg) {
-        Serial.println("egg");
-      }
-      else {
-        Serial.println("no egg");
-      }
-
-      Serial.println(snakeLength);
       if (!collisions())
       {
         draw();
@@ -222,7 +213,6 @@ void moveSnake()
   //move up
   if (upward == true)
   {
-    //Serial.print("upward\n");
     if (y[0] - SEGMENT_SIZE < 1) {
       temp_y = AREAHEIGHT - SEGMENT_SIZE - 1;
     }
@@ -236,7 +226,6 @@ void moveSnake()
   //move right
   else if (rightward == true)
   {
-    //Serial.print("rightward\n");
     if (x[0] + SEGMENT_SIZE > AREAWIDTH - SEGMENT_SIZE - 2) {
       temp_x = 2;
     }
@@ -250,7 +239,6 @@ void moveSnake()
   //move down
   else if (downward == true)
   {
-    //Serial.print("downward\n");
     if (y[0] + SEGMENT_SIZE > AREAHEIGHT - SEGMENT_SIZE - 1) {
       temp_y = 1;
     }
@@ -264,7 +252,6 @@ void moveSnake()
   //move left
   else if (leftward == true)
   {
-    //Serial.print("leftward\n");
     if (x[0] - SEGMENT_SIZE < 2) {
       temp_x = AREAWIDTH - SEGMENT_SIZE - 2;
     }
@@ -275,6 +262,7 @@ void moveSnake()
     temp_d = LEFT_DIRECTION;
   }
 
+
   //snake length ++
   if (eats[snakeLength - 1])
   {
@@ -283,28 +271,27 @@ void moveSnake()
     snakeLength++;
   }
 
+
+  //snake position shift
+  byte i;
+  for (i = 0; i <= snakeLength; i++)
   {
-    //snake position shift
-    byte i;
-    for (i = 0; i <= snakeLength; i++)
-    {
-      byte _x = x[i];
-      byte _y = y[i];
-      byte _d = d[i];
+    byte _x = x[i];
+    byte _y = y[i];
+    byte _d = d[i];
 
-      x[i] = temp_x;
-      y[i] = temp_y;
-      d[i] = temp_d;
+    x[i] = temp_x;
+    y[i] = temp_y;
+    d[i] = temp_d;
 
-      temp_x = _x;
-      temp_y = _y;
-      temp_d = _d;
+    temp_x = _x;
+    temp_y = _y;
+    temp_d = _d;
 
-      boolean _eats = eats[i];
-      eats[i] = temp_eats;
-      temp_eats = _eats;
+    boolean _eats = eats[i];
+    eats[i] = temp_eats;
+    temp_eats = _eats;
 
-    }
   }
 
 
@@ -333,6 +320,8 @@ boolean collisions()
   {
     eats[0] = true;
     egg = false;
+    score++;
+    Serial.println(score);
   }
   else {
     eats[0] = false;
@@ -346,14 +335,12 @@ void draw()
 {
   //clear excess tail
   if (excessTail_x) {
-    //Serial.println("clear tail");
     display.fillRect(excessTail_x, excessTail_y, 5, 5, WHITE);
   }
 
 
   //draw egg
   if (egg) {
-//    Serial.println("draw egg");
     display.drawCircle(egg_x + 2, egg_y + 2, 1, BLACK);
   }
 
@@ -361,8 +348,8 @@ void draw()
   //clear egg
   if (eats[snakeLength - 1])
   {
-//    Serial.println("clear egg");
-//    display.fillRect(egg_x, egg_y, 5, 5, BLACK);
+    //    Serial.println("clear egg");
+    //    display.fillRect(egg_x, egg_y, 5, 5, BLACK);
   }
 
 
@@ -584,11 +571,11 @@ void addEgg()
 
 void gameOver()
 {
-  score = snakeLength - INITIAL_SNAKE_LENGTH;
+  score -= INITIAL_SNAKE_LENGTH;
 
-  display.fillRect(14, 14, 55, 18, WHITE);
+  display.fillRect(14, 14, 55, 18, BLACK);
 
-  display.setTextColor(BLACK);
+  display.setTextColor(WHITE);
   display.setTextSize(1);
 
   display.setCursor(15, 15);
