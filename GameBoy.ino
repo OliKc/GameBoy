@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
-//Written by Limor Fried/Ladyada  for Adafruit Industries.
-#include <Adafruit_PCD8544.h>
+#include <Adafruit_PCD8544.h> //Written by Limor Fried/Ladyada  for Adafruit Industries.
+
 
 // Software SPI (slower updates, more flexible pin options):
 // pin 7 - Serial clock out (SCLK)
@@ -11,47 +11,59 @@
 // pin 3 - LCD reset (RST)
 Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 
+
+//play area size
 #define AREAWIDTH 84
 #define AREAHEIGHT 47     //1px trimmed
 
+//segmenent properties
 #define SEGMENT_SIZE 5
 #define SEGMENTS_WIDTH 16
 #define SEGMENTS_HEIGHT 9
 #define SEGMENT_COUNT 144 //16*9
 
-//D pad pins
+//buttons pins
+#define MENU 2
+#define A 12
+#define B 13
+
+//d pad buttons pins
 #define UP 8
 #define RIGHT 9
 #define DOWN 10
 #define LEFT 11
 
+//buzzer
+#define BUZZ A5
+
+//direction consts
 #define UP_DIRECTION 0
 #define RIGHT_DIRECTION 1
 #define DOWN_DIRECTION 2
 #define LEFT_DIRECTION 3
 
+//
 #define INITIAL_SNAKE_LENGTH 6
 
-long previousMillis = 0;
-int interval = 1000;
 
+//clock vals
+int interval;
+long previousMillis;
 
-byte score = 0;
-
-byte buttonState = 0;
+byte score;
 
 boolean paused = false;
 
-
+//egg vals
 byte egg_x;
 byte egg_y;
-boolean egg = false;
+boolean egg;
 
 //direction flags
-boolean upward = false;
-boolean rightward = false;
-boolean downward = false;
-boolean leftward = false;
+boolean upward;
+boolean rightward;
+boolean downward;
+boolean leftward;
 
 byte anchor_x[SEGMENTS_WIDTH];
 byte anchor_y[SEGMENTS_HEIGHT];
@@ -61,27 +73,34 @@ byte x[SEGMENT_COUNT];
 byte y[SEGMENT_COUNT];
 byte d[SEGMENT_COUNT];
 boolean eats[SEGMENT_COUNT];
-byte snakeLength = INITIAL_SNAKE_LENGTH;
-byte excessTail_x = 0;
+byte snakeLength;
+byte excessTail_x;
 byte excessTail_y;
-
-
-int Buzzer;
 
 
 void setup()
 {
   randomSeed(analogRead(0));
 
+  //d pad
   pinMode(UP, INPUT);
   pinMode(RIGHT, INPUT);
   pinMode(DOWN, INPUT);
   pinMode(LEFT, INPUT);
 
+  //A, B buttons
+  pinMode(A, INPUT);
+  pinMode(B, INPUT);
 
-  pinMode(13, OUTPUT); //LED
+  //menu button
+  pinMode(MENU, INPUT);
 
-  pinMode(Buzzer, OUTPUT);  //Buzzer pin
+  //buzzer
+  pinMode(BUZZ, OUTPUT);
+
+
+  setVals();
+
 
   Serial.begin(9600);
 
@@ -142,8 +161,7 @@ void loop()
       {
         draw();
       }
-      else
-      {
+      else {
         gameOver();
         paused = true;
       }
@@ -571,7 +589,29 @@ void gameOver()
   display.display();
 
   //if again button pressed
-  //resetValues();
+  //resetvals();
   //setup();
   //paused = false;
+}
+
+void setVals()
+{
+  paused = false;
+
+  upward = false;
+  rightward = false;
+  downward = false;
+  leftward = false;
+
+  score = 0;
+
+  snakeLength = INITIAL_SNAKE_LENGTH;
+
+  egg = false;
+
+  excessTail_x = 0;
+  excessTail_y = 0;
+
+  previousMillis = 0;
+  interval = 1000;
 }
