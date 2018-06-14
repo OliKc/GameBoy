@@ -68,6 +68,9 @@ byte excessTail_y;
 
 int Buzzer;
 
+#define LOGO16_GLCD_HEIGHT 16
+#define LOGO16_GLCD_WIDTH  16
+
 
 void setup()
 {
@@ -288,6 +291,7 @@ void moveSnake()
     boolean _eats = eats[i];
     eats[i] = temp_eats;
     temp_eats = _eats;
+
   }
 
 
@@ -317,6 +321,7 @@ boolean collisions()
     eats[0] = true;
     egg = false;
     score++;
+    Serial.println(score);
   }
   else {
     eats[0] = false;
@@ -337,6 +342,14 @@ void draw()
   //draw egg
   if (egg) {
     display.drawCircle(egg_x + 2, egg_y + 2, 1, BLACK);
+  }
+
+
+  //clear egg
+  if (eats[snakeLength - 1])
+  {
+    //    Serial.println("clear egg");
+    //    display.fillRect(egg_x, egg_y, 5, 5, BLACK);
   }
 
 
