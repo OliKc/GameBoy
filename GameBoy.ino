@@ -36,7 +36,7 @@ long previousMillis = 0;
 int interval = 1000;
 
 
-byte score = INITIAL_SNAKE_LENGTH;
+byte score = 0;
 
 byte buttonState = 0;
 
@@ -97,8 +97,6 @@ void setup()
   //draw vertical borders
   display.drawLine(1, 0, 1, AREAHEIGHT - 1, BLACK);
   display.drawLine(AREAWIDTH - 2, 0, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
-
-  display.display();
 
 
   byte i;
@@ -535,7 +533,6 @@ void addEgg()
       available_y[j] = anchor_y[a_yi];
       j++;
     }
-    else {
 
     a_xi++;
   }
@@ -549,14 +546,12 @@ void addEgg()
 
 void gameOver()
 {
-  score -= INITIAL_SNAKE_LENGTH;
+  display.fillRect(12, 16, 60, 15, WHITE);
 
-  display.fillRect(14, 14, 55, 18, BLACK);
-
-  display.setTextColor(WHITE);
+  display.setTextColor(BLACK);
   display.setTextSize(1);
 
-  display.setCursor(15, 15);
+  display.setCursor(15, 16);
   display.print("Game Over");
 
   display.setCursor(15, 24);
