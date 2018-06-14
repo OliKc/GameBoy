@@ -33,7 +33,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define INITIAL_SNAKE_LENGTH 4
 
 long previousMillis = 0;
-int interval = 1500;
+int interval = 1000;
 
 
 byte score;
@@ -131,10 +131,10 @@ void loop()
 {
   steering();
 
-  if (!egg)
-  {
-    addEgg();
-  }
+  //  if (!egg)
+  //  {
+  //    addEgg();
+  //  }
 
   if (!paused)
   {
@@ -142,12 +142,12 @@ void loop()
 
     if (currentMillis - previousMillis > interval)
     {
-      //      if (!egg)
-      //      {
-      //        addEgg();
-      //      }
-
       moveSnake();
+
+      if (!egg) {
+        addEgg();
+      }
+
       Serial.println(snakeLength);
       if (!collisions())
       {
@@ -272,15 +272,15 @@ void moveSnake()
     temp_d = LEFT_DIRECTION;
   }
 
-
-
+  //snake length ++
   if (eats[snakeLength - 1])
   {
     Serial.print("++");
     eats[snakeLength - 1] = false;
     snakeLength++;
+    egg = false;
   }
-  //else
+
   {
     //snake position shift
     byte i;
@@ -298,16 +298,10 @@ void moveSnake()
       temp_y = _y;
       temp_d = _d;
 
-      //if (i != snakeLength)
-      {
-        boolean _eats = eats[i];
-        eats[i] = temp_eats;
-        temp_eats = _eats;
-      }
-      //else
-      {
+      boolean _eats = eats[i];
+      eats[i] = temp_eats;
+      temp_eats = _eats;
 
-      }
     }
   }
 
@@ -317,23 +311,6 @@ void moveSnake()
   excessTail_y = y[snakeLength];
   x[snakeLength] = 0; //or :=NULL
   y[snakeLength] = 0; //or :=NULL
-
-
-
-//  if (eats[snakeLength])
-//  {
-//    x[snakeLength - 1] = excessTail_x;
-//    y[snakeLength - 1] = excessTail_y;
-//  }
-
-
-
-  //eats[snakeLength] = false; //?
-  //eats[snakeLength - 1] = false; //?
-
-
-
-
 }
 
 
@@ -366,23 +343,23 @@ void draw()
 {
   //clear excess tail
   if (excessTail_x) {
-    Serial.println("clear tail");
+    //Serial.println("clear tail");
     display.fillRect(excessTail_x, excessTail_y, 5, 5, WHITE);
   }
 
 
   //draw egg
-  if (egg) {
+  if (egg && !eats[snakeLength]) {
     Serial.println("draw egg");
     display.drawCircle(egg_x + 2, egg_y + 2, 1, BLACK);
   }
 
 
   //clear egg
-  if (eats[snakeLength])
+  if (eats[snakeLength - 1])
   {
     Serial.println("clear egg");
-    display.fillRect(egg_x, egg_y, 5, 5, WHITE);
+    display.fillRect(egg_x, egg_y, 5, 5, BLACK);
   }
 
 
@@ -593,8 +570,8 @@ void addEgg()
   }
 
   byte randIndex = random(0, j - 1);
-  egg_x = 42;//available_x[randIndex];
-  egg_y = 21;//available_y[randIndex];
+  egg_x = available_x[randIndex];
+  egg_y = available_y[randIndex];
   egg = true;
 
   //  Serial.println(randIndex);
