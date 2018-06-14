@@ -501,6 +501,7 @@ void draw()
   display.display();
 }
 
+
 void addEgg()
 {
   byte available_x[SEGMENT_COUNT - snakeLength];
@@ -530,18 +531,11 @@ void addEgg()
 
     if (available_position)
     {
-      //      Serial.println("wpisano do available");
       available_x[j] = anchor_x[a_xi];
       available_y[j] = anchor_y[a_yi];
       j++;
     }
     else {
-      //      Serial.println("!!!SNAKE!!!");
-    }
-
-    //    Serial.print(a_yi);
-    //    Serial.print(": ");
-    //    Serial.println(a_xi);
 
     a_xi++;
   }
@@ -550,11 +544,8 @@ void addEgg()
   egg_x = available_x[randIndex];
   egg_y = available_y[randIndex];
   egg = true;
-
-  //  Serial.println(randIndex);
-  //  Serial.println(j);
-  //  Serial.println(SEGMENT_COUNT - snakeLength);
 }
+
 
 void gameOver()
 {
