@@ -131,21 +131,24 @@ void loop()
 {
   steering();
 
-  //  if (!egg)
-  //  {
-  //    addEgg();
-  //  }
-
   if (!paused)
   {
     unsigned long currentMillis = millis();
 
     if (currentMillis - previousMillis > interval)
     {
-      moveSnake();
 
       if (!egg) {
         addEgg();
+      }
+      
+      moveSnake();
+
+      if (egg) {
+        Serial.println("egg");
+      }
+      else {
+        Serial.println("no egg");
       }
 
       Serial.println(snakeLength);
@@ -278,7 +281,6 @@ void moveSnake()
     Serial.print("++");
     eats[snakeLength - 1] = false;
     snakeLength++;
-    egg = false;
   }
 
   {
@@ -330,6 +332,7 @@ boolean collisions()
   if (x[0] == egg_x && y[0] == egg_y)
   {
     eats[0] = true;
+    egg = false;
   }
   else {
     eats[0] = false;
@@ -349,8 +352,8 @@ void draw()
 
 
   //draw egg
-  if (egg && !eats[snakeLength]) {
-    Serial.println("draw egg");
+  if (egg) {
+//    Serial.println("draw egg");
     display.drawCircle(egg_x + 2, egg_y + 2, 1, BLACK);
   }
 
@@ -358,8 +361,8 @@ void draw()
   //clear egg
   if (eats[snakeLength - 1])
   {
-    Serial.println("clear egg");
-    display.fillRect(egg_x, egg_y, 5, 5, BLACK);
+//    Serial.println("clear egg");
+//    display.fillRect(egg_x, egg_y, 5, 5, BLACK);
   }
 
 
