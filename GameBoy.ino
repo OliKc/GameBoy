@@ -24,14 +24,12 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 
 //buttons pins
 #define MENU 2
-#define A 12
-#define B 13
-
-//d pad buttons pins
 #define UP 8
 #define RIGHT 9
 #define DOWN 10
 #define LEFT 11
+#define A 12
+#define B 13
 
 //buzzer
 #define BUZZ A5
@@ -79,8 +77,71 @@ byte excessTail_x;
 byte excessTail_y;
 
 
+void setVals()
+{
+  paused = false;
+
+  upward = false;
+  rightward = false;
+  downward = false;
+  leftward = false;
+
+  score = 0;
+
+  egg = false;
+
+  previousMillis = 0;
+  interval = 750;
+
+
+  byte i;
+  /*--------------------------------*/
+  //reset snake properties
+  for (i = 0; i < SEGMENT_COUNT; i++)
+  {
+    x[i] = 0;
+    y[i] = 0;
+    eats[i] = false;
+  }
+
+  excessTail_x = 0;
+  excessTail_y = 0;
+  /*--------------------------------*/
+
+  /*--------------------------------*/
+  //initial snake properties
+  for (i = 0; i < INITIAL_SNAKE_LENGTH; i++)
+  {
+    x[i] = anchor_x[6 - i];
+    y[i] = anchor_y[4];
+    d[i] = RIGHT_DIRECTION;
+    eats[i] = false;
+  }
+
+  rightward = true;
+  snakeLength = INITIAL_SNAKE_LENGTH;
+  /*--------------------------------*/
+
+  /*--------------------------------*/
+  //clear display
+  display.clearDisplay();
+
+  //draw horizontal borders
+  display.drawLine(1, 0, AREAWIDTH - 2, 0, BLACK);
+  display.drawLine(1, AREAHEIGHT - 1, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
+
+  //draw vertical borders
+  display.drawLine(1, 0, 1, AREAHEIGHT - 1, BLACK);
+  display.drawLine(AREAWIDTH - 2, 0, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
+
+  draw();
+  /*--------------------------------*/
+}
+
+
 void setup()
 {
+  Serial.begin(9600);
   randomSeed(analogRead(0));
 
   //d pad
@@ -99,27 +160,8 @@ void setup()
   //buzzer
   pinMode(BUZZ, OUTPUT);
 
-
-  setVals();
-
-
-  Serial.begin(9600);
-
-  //init display
-  display.begin();
-  display.clearDisplay();
-  display.setContrast(55);
-
-  //draw horizontal borders
-  display.drawLine(1, 0, AREAWIDTH - 2, 0, BLACK);
-  display.drawLine(1, AREAHEIGHT - 1, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
-
-  //draw vertical borders
-  display.drawLine(1, 0, 1, AREAHEIGHT - 1, BLACK);
-  display.drawLine(AREAWIDTH - 2, 0, AREAWIDTH - 2, AREAHEIGHT - 1, BLACK);
-
-
   byte i;
+    
   //fill anchors
   for (i = 0; i < SEGMENTS_WIDTH; i++) {
     anchor_x[i] = i * 5 + 2;
@@ -128,26 +170,21 @@ void setup()
     anchor_y[i] = i * 5 + 1;
   }
 
-  //initial snake properties
-  for (i = 0; i < INITIAL_SNAKE_LENGTH; i++)
-  {
-    x[i] = anchor_x[6 - i];
-    y[i] = anchor_y[4];
-    d[i] = RIGHT_DIRECTION;
-  }
+  //init display
+  display.begin();
+  display.setContrast(55);
 
-  rightward = true;
-
-  draw();
+  setVals();
 }
 
 
 void loop()
 {
   steering();
-
-  if (!paused)
+  
+  if (paused == false)
   {
+    //println("LOOP");
     unsigned long currentMillis = millis();
 
     if (currentMillis - previousMillis > interval)
@@ -163,8 +200,8 @@ void loop()
         draw();
       }
       else {
-        gameOver();
         paused = true;
+        gameOver();
       }
 
       previousMillis = currentMillis;
@@ -574,27 +611,6 @@ void gameOver()
   display.display();
 
   //if again button pressed
-  //setup();
-}
-
-void setVals()
-{
-  paused = false;
-
-  upward = false;
-  rightward = false;
-  downward = false;
-  leftward = false;
-
-  score = 0;
-
-  snakeLength = INITIAL_SNAKE_LENGTH;
-
-  egg = false;
-
-  excessTail_x = 0;
-  excessTail_y = 0;
-
-  previousMillis = 0;
-  interval = 750;
+  delay(5000);
+  setVals();
 }
